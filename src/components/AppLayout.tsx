@@ -3,7 +3,7 @@ import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, ClipboardList, Users, BarChart3,
-  LogOut, CreditCard, Bell, Wrench, PackageCheck
+  LogOut, CreditCard, Bell, Wrench, PackageCheck, BookOpen
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -25,6 +25,7 @@ const NAV_ITEMS: NavItem[] = [
   { title: 'Оплата', url: '/payments', icon: CreditCard, roles: ['admin'] },
   { title: 'Выдача', url: '/delivery', icon: PackageCheck, roles: ['admin'] },
   { title: 'Уведомления', url: '/notifications', icon: Bell, roles: ['admin'] },
+  { title: 'Справочники', url: '/directories', icon: BookOpen, roles: ['admin','production','director'] },
   { title: 'Отчётность', url: '/reports', icon: BarChart3, roles: ['director','admin'] },
 ];
 

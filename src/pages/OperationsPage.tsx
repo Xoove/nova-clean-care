@@ -21,7 +21,7 @@ const OperationsPage = () => {
   const refresh = () => { setOrders(getOrders()); setEmployees(getEmployees()); };
   useEffect(refresh, []);
 
-  const activeOrders = orders.filter(o => o.status !== 'Выдан');
+  const activeOrders = orders.filter(o => o.status !== 'Выдан клиенту');
   const allOps = orders.flatMap(o => o.operations.map(op => ({ ...op, orderNumber: o.orderNumber })));
   const filteredOps = allOps.filter(op => !search || String(op.orderNumber).includes(search) || op.employeeName.toLowerCase().includes(search.toLowerCase()) || op.operationType.toLowerCase().includes(search.toLowerCase()));
 

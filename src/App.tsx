@@ -14,6 +14,7 @@ import PaymentsPage from "./pages/PaymentsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import ReportsPage from "./pages/ReportsPage";
 import DeliveryPage from "./pages/DeliveryPage";
+import DirectoriesPage from "./pages/DirectoriesPage";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
@@ -37,6 +38,7 @@ function AppRoutes() {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/delivery" element={<DeliveryPage />} />
+        <Route path="/directories" element={<DirectoriesPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

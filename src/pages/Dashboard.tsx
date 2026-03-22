@@ -30,9 +30,9 @@ const Dashboard = () => {
   }, []);
 
   const now = new Date();
-  const overdueCount = orders.filter(o => new Date(o.deadline) < now && o.status !== 'Выдан').length;
+  const overdueCount = orders.filter(o => new Date(o.deadline) < now && o.status !== 'Выдан клиенту').length;
   const readyCount = orders.filter(o => o.status === 'Готов к выдаче').length;
-  const inProgressCount = orders.filter(o => o.status !== 'Выдан' && o.status !== 'Готов к выдаче').length;
+  const inProgressCount = orders.filter(o => o.status !== 'Выдан клиенту' && o.status !== 'Готов к выдаче').length;
   const totalRevenue = orders.filter(o => o.paymentStatus === 'Оплачено').reduce((s, o) => s + o.totalCost, 0);
   const paidOrders = orders.filter(o => o.paymentStatus === 'Оплачено');
   const avgCheck = paidOrders.length > 0 ? Math.round(totalRevenue / paidOrders.length) : 0;
@@ -88,7 +88,7 @@ const Dashboard = () => {
           <div className="space-y-2">
             {orders.slice(0, 4).map(o => {
               const client = clients.find(c => c.id === o.clientId);
-              const overdue = new Date(o.deadline) < now && o.status !== 'Выдан';
+              const overdue = new Date(o.deadline) < now && o.status !== 'Выдан клиенту';
               return (
                 <div key={o.id} className={`flex justify-between items-center text-sm px-3 py-2 rounded-md ${overdue ? 'bg-overdue/5 border border-overdue/20' : 'bg-muted/50'}`}>
                   <span>№{o.orderNumber} {client ? `${client.lastName} ${client.firstName}` : ''}</span>

@@ -43,10 +43,10 @@ const OrdersPage = () => {
     const change: StatusChange = { status: nextStatus, changedAt: new Date().toISOString(), changedBy: user?.name || '' };
     const updated: Order = { ...order, status: nextStatus, statusHistory: [...order.statusHistory, change] };
 
-    if (nextStatus === 'Выдан') {
+    if (nextStatus === 'Выдан клиенту') {
       updated.items = updated.items.map(i => ({ ...i, status: 'Выдано' as const }));
       updated.issueDate = new Date().toISOString();
-    } else if (['В обработке', 'Пятновыведение', 'Чистка', 'Сушка', 'Глажение'].includes(nextStatus)) {
+    } else if (['Принят в производство', 'Пятновыведение', 'Чистка / стирка', 'Сушка', 'Глажение'].includes(nextStatus)) {
       updated.items = updated.items.map(i => ({ ...i, status: 'В обработке' as const }));
     } else if (['Контроль качества', 'Готов к выдаче'].includes(nextStatus)) {
       updated.items = updated.items.map(i => ({ ...i, status: 'Готово' as const }));
@@ -100,7 +100,7 @@ const OrdersPage = () => {
       <div className="space-y-2">
         {filtered.map(o => {
           const client = clients.find(c => c.id === o.clientId);
-          const overdue = new Date(o.deadline) < now && o.status !== 'Выдан';
+          const overdue = new Date(o.deadline) < now && o.status !== 'Выдан клиенту';
           return (
             <Card key={o.id} className={`p-4 card-shadow hover:card-shadow-hover transition-shadow cursor-pointer ${overdue ? 'border-overdue/30' : ''}`} onClick={() => setSelectedOrder(o)}>
               <div className="flex items-center justify-between gap-4">
@@ -120,7 +120,7 @@ const OrdersPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-xs whitespace-nowrap">{o.status}</Badge>
-                  {o.status !== 'Выдан' && (user?.role === 'admin' || user?.role === 'production') && (
+                  {o.status !== 'Выдан клиенту' && (user?.role === 'admin' || user?.role === 'production') && (
                     <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); advanceStatus(o); }}>
                       <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -162,7 +162,7 @@ const OrdersPage = () => {
 function OrderDetail({ order, clients, employees, onAdvance, user }: { order: Order; clients: Client[]; employees: Employee[]; onAdvance: () => void; user: any }) {
   const client = clients.find(c => c.id === order.clientId);
   const emp = employees.find(e => e.id === order.employeeId);
-  const overdue = new Date(order.deadline) < new Date() && order.status !== 'Выдан';
+  const overdue = new Date(order.deadline) < new Date() && order.status !== 'Выдан клиенту';
   const statusIdx = ORDER_STATUSES.indexOf(order.status);
 
   return (
@@ -248,7 +248,7 @@ function OrderDetail({ order, clients, employees, onAdvance, user }: { order: Or
         </div>
       </div>
 
-      {order.status !== 'Выдан' && (user?.role === 'admin' || user?.role === 'production') && (
+      {order.status !== 'Выдан клиенту' && (user?.role === 'admin' || user?.role === 'production') && (
         <Button onClick={onAdvance} className="w-full gap-2">
           <ArrowRight className="h-4 w-4" />Перевести в: {ORDER_STATUSES[statusIdx + 1]}
         </Button>
