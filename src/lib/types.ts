@@ -105,8 +105,16 @@ export const POSITIONS = [
 ] as const;
 
 export const OPERATION_TYPES = [
-  'Ремонт','Чистка','Сушка','Глажение','Пятновыведение','Контроль качества','Стирка','Упаковка'
+  'Ремонт','Пятновыведение','Чистка','Стирка','Сушка','Глажение','Контроль качества'
 ] as const;
+
+export const USER_ROLES_LABELS = [
+  'Администратор-кассир','Производственный персонал','Руководитель предприятия'
+] as const;
+
+export const NOTIFICATION_TYPES = ['SMS','Email','Уведомление о готовности заказа'] as const;
+
+export const NOTIFICATION_STATUSES = ['Отправлено','Не отправлено','Ошибка'] as const;
 
 export const PAYMENT_METHODS = ['Наличные','Банковская карта','Безналичный расчет'] as const;
 export const PAYMENT_STATUSES = ['Не оплачено','Частично оплачено','Оплачено'] as const;

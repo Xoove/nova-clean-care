@@ -38,6 +38,7 @@ function AppRoutes() {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/delivery" element={<DeliveryPage />} />
+        <Route path="/directories" element={<DirectoriesPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

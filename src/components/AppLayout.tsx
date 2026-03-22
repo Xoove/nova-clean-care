@@ -25,6 +25,7 @@ const NAV_ITEMS: NavItem[] = [
   { title: 'Оплата', url: '/payments', icon: CreditCard, roles: ['admin'] },
   { title: 'Выдача', url: '/delivery', icon: PackageCheck, roles: ['admin'] },
   { title: 'Уведомления', url: '/notifications', icon: Bell, roles: ['admin'] },
+  { title: 'Справочники', url: '/directories', icon: BookOpen, roles: ['admin','production','director'] },
   { title: 'Отчётность', url: '/reports', icon: BarChart3, roles: ['director','admin'] },
 ];
 
