@@ -14,6 +14,7 @@ import PaymentsPage from "./pages/PaymentsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import ReportsPage from "./pages/ReportsPage";
 import DeliveryPage from "./pages/DeliveryPage";
+import DirectoriesPage from "./pages/DirectoriesPage";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
