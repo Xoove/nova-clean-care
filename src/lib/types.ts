@@ -91,11 +91,11 @@ export interface Service {
 }
 
 export const SERVICES: Service[] = [
-  { id: '1', name: 'Химчистка', price: 1200 },
+  { id: '1', name: 'Химическая чистка', price: 1200 },
   { id: '2', name: 'Стирка', price: 800 },
   { id: '3', name: 'Пятновыведение', price: 400 },
   { id: '4', name: 'Глажение', price: 300 },
-  { id: '5', name: 'Ремонт', price: 500 },
+  { id: '5', name: 'Мелкий ремонт', price: 500 },
   { id: '6', name: 'Сушка', price: 250 },
 ];
 
