@@ -120,7 +120,7 @@ const OrdersPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-xs whitespace-nowrap">{o.status}</Badge>
-                  {o.status !== 'Выдан' && (user?.role === 'admin' || user?.role === 'production') && (
+                  {o.status !== 'Выдан клиенту' && (user?.role === 'admin' || user?.role === 'production') && (
                     <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); advanceStatus(o); }}>
                       <ArrowRight className="h-4 w-4" />
                     </Button>
