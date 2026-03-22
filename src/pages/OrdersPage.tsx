@@ -43,10 +43,10 @@ const OrdersPage = () => {
     const change: StatusChange = { status: nextStatus, changedAt: new Date().toISOString(), changedBy: user?.name || '' };
     const updated: Order = { ...order, status: nextStatus, statusHistory: [...order.statusHistory, change] };
 
-    if (nextStatus === 'Выдан') {
+    if (nextStatus === 'Выдан клиенту') {
       updated.items = updated.items.map(i => ({ ...i, status: 'Выдано' as const }));
       updated.issueDate = new Date().toISOString();
-    } else if (['В обработке', 'Пятновыведение', 'Чистка', 'Сушка', 'Глажение'].includes(nextStatus)) {
+    } else if (['Принят в производство', 'Пятновыведение', 'Чистка / стирка', 'Сушка', 'Глажение'].includes(nextStatus)) {
       updated.items = updated.items.map(i => ({ ...i, status: 'В обработке' as const }));
     } else if (['Контроль качества', 'Готов к выдаче'].includes(nextStatus)) {
       updated.items = updated.items.map(i => ({ ...i, status: 'Готово' as const }));
