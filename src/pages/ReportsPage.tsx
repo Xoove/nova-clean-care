@@ -22,9 +22,9 @@ const ReportsPage = () => {
     return true;
   });
 
-  const completed = filtered.filter(o => o.status === 'Выдан');
-  const inWork = filtered.filter(o => o.status !== 'Выдан' && o.status !== 'Готов к выдаче');
-  const overdue = filtered.filter(o => new Date(o.deadline) < new Date() && o.status !== 'Выдан');
+  const completed = filtered.filter(o => o.status === 'Выдан клиенту');
+  const inWork = filtered.filter(o => o.status !== 'Выдан клиенту' && o.status !== 'Готов к выдаче');
+  const overdue = filtered.filter(o => new Date(o.deadline) < new Date() && o.status !== 'Выдан клиенту');
   const payments = filtered.filter(o => o.paymentStatus === 'Оплачено');
   const totalRevenue = payments.reduce((s, o) => s + o.totalCost, 0);
   const avgCheck = payments.length > 0 ? Math.round(totalRevenue / payments.length) : 0;

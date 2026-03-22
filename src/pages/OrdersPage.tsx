@@ -248,7 +248,7 @@ function OrderDetail({ order, clients, employees, onAdvance, user }: { order: Or
         </div>
       </div>
 
-      {order.status !== 'Выдан' && (user?.role === 'admin' || user?.role === 'production') && (
+      {order.status !== 'Выдан клиенту' && (user?.role === 'admin' || user?.role === 'production') && (
         <Button onClick={onAdvance} className="w-full gap-2">
           <ArrowRight className="h-4 w-4" />Перевести в: {ORDER_STATUSES[statusIdx + 1]}
         </Button>

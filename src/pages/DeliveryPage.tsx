@@ -112,10 +112,10 @@ function DeliveryForm({ readyOrders, employees, userName, onDelivered }: { ready
 
     updateOrder({
       ...order,
-      status: 'Выдан',
+      status: 'Выдан клиенту',
       issueDate: new Date().toISOString(),
       items: order.items.map(i => ({ ...i, status: 'Выдано' as const })),
-      statusHistory: [...order.statusHistory, { status: 'Выдан' as const, changedAt: new Date().toISOString(), changedBy: userName }],
+      statusHistory: [...order.statusHistory, { status: 'Выдан клиенту' as const, changedAt: new Date().toISOString(), changedBy: userName }],
     });
 
     toast.success('Заказ выдан клиенту');
