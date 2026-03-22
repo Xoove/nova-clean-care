@@ -162,7 +162,7 @@ const OrdersPage = () => {
 function OrderDetail({ order, clients, employees, onAdvance, user }: { order: Order; clients: Client[]; employees: Employee[]; onAdvance: () => void; user: any }) {
   const client = clients.find(c => c.id === order.clientId);
   const emp = employees.find(e => e.id === order.employeeId);
-  const overdue = new Date(order.deadline) < new Date() && order.status !== 'Выдан';
+  const overdue = new Date(order.deadline) < new Date() && order.status !== 'Выдан клиенту';
   const statusIdx = ORDER_STATUSES.indexOf(order.status);
 
   return (
