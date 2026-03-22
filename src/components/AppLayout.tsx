@@ -3,7 +3,7 @@ import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, ClipboardList, Users, BarChart3,
-  LogOut, CreditCard, Bell, Wrench, PackageCheck
+  LogOut, CreditCard, Bell, Wrench, PackageCheck, BookOpen
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
