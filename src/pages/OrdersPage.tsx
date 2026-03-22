@@ -100,7 +100,7 @@ const OrdersPage = () => {
       <div className="space-y-2">
         {filtered.map(o => {
           const client = clients.find(c => c.id === o.clientId);
-          const overdue = new Date(o.deadline) < now && o.status !== 'Выдан';
+          const overdue = new Date(o.deadline) < now && o.status !== 'Выдан клиенту';
           return (
             <Card key={o.id} className={`p-4 card-shadow hover:card-shadow-hover transition-shadow cursor-pointer ${overdue ? 'border-overdue/30' : ''}`} onClick={() => setSelectedOrder(o)}>
               <div className="flex items-center justify-between gap-4">
