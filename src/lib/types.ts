@@ -13,8 +13,10 @@ export interface Client {
   id: string;
   firstName: string;
   lastName: string;
+  patronymic?: string;
   phone: string;
   email?: string;
+  note?: string;
   createdAt: string;
 }
 
@@ -28,15 +30,17 @@ export const MATERIALS = [
 ] as const;
 
 export const ITEM_STATUSES = ['Принято','В обработке','Готово','Выдано'] as const;
-
 export type ItemStatus = typeof ITEM_STATUSES[number];
 
 export interface Item {
   id: string;
+  clientId: string;
   orderId: string;
   type: string;
   material: string;
   status: ItemStatus;
+  features?: string;
+  markingCode?: string;
   defects: Defect[];
 }
 
@@ -47,15 +51,15 @@ export interface Defect {
 }
 
 export const ORDER_STATUSES = [
-  'Принят','Принят в производство','Определение способа обработки','Подготовка изделия',
-  'Мелкий ремонт','Пятновыведение','Чистка / стирка','Сушка','Глажение',
-  'Контроль качества','Упаковка','Готов к выдаче','Выдан клиенту'
+  'Принят','В обработке','Пятновыведение','Чистка','Сушка','Глажение',
+  'Контроль качества','Готов к выдаче','Выдан'
 ] as const;
 
 export type OrderStatus = typeof ORDER_STATUSES[number];
 
 export interface Order {
   id: string;
+  orderNumber: number;
   clientId: string;
   items: Item[];
   services: OrderService[];
@@ -64,6 +68,10 @@ export interface Order {
   paymentStatus: PaymentStatus;
   createdAt: string;
   deadline: string;
+  actualReadyDate?: string;
+  issueDate?: string;
+  description?: string;
+  employeeId?: string;
   statusHistory: StatusChange[];
   operations: Operation[];
 }
@@ -71,6 +79,8 @@ export interface Order {
 export interface OrderService {
   serviceId: string;
   quantity: number;
+  price: number;
+  sum: number;
 }
 
 export interface Service {
@@ -80,17 +90,21 @@ export interface Service {
 }
 
 export const SERVICES: Service[] = [
-  { id: '1', name: 'Химическая чистка', price: 1200 },
+  { id: '1', name: 'Химчистка', price: 1200 },
   { id: '2', name: 'Стирка', price: 800 },
   { id: '3', name: 'Пятновыведение', price: 400 },
   { id: '4', name: 'Глажение', price: 300 },
-  { id: '5', name: 'Мелкий ремонт', price: 500 },
+  { id: '5', name: 'Ремонт', price: 500 },
   { id: '6', name: 'Сушка', price: 250 },
 ];
 
 export const POSITIONS = [
   'Администратор-кассир','Технолог','Генеральный директор','Специалист по пятновыведению',
   'Швея','Оператор оборудования','Гладильщик','Водитель-экспедитор'
+] as const;
+
+export const OPERATION_TYPES = [
+  'Ремонт','Чистка','Сушка','Глажение','Пятновыведение','Контроль качества','Стирка','Упаковка'
 ] as const;
 
 export const PAYMENT_METHODS = ['Наличные','Банковская карта','Безналичный расчет'] as const;
@@ -102,16 +116,21 @@ export interface Payment {
   orderId: string;
   amount: number;
   method: string;
+  status: PaymentStatus;
+  employeeId?: string;
   date: string;
 }
 
 export interface Operation {
   id: string;
   orderId: string;
-  status: OrderStatus;
+  itemId?: string;
+  operationType: string;
+  employeeId: string;
   employeeName: string;
   startedAt: string;
   completedAt?: string;
+  duration?: number; // minutes
   notes?: string;
 }
 
@@ -127,11 +146,20 @@ export interface Employee {
   position: string;
 }
 
+export interface Delivery {
+  id: string;
+  orderId: string;
+  employeeId: string;
+  date: string;
+  recipientName: string;
+  document?: string;
+}
+
 export interface Notification {
   id: string;
   orderId: string;
   clientId: string;
-  type: 'SMS' | 'Email' | 'Уведомление о готовности заказа';
+  type: 'SMS' | 'Email';
   message: string;
   createdAt: string;
   read: boolean;

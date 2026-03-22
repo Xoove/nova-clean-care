@@ -7,7 +7,7 @@ import { ClipboardList, Users, DollarSign, AlertTriangle, CheckCircle, Clock } f
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const StatCard = ({ icon: Icon, label, value, accent }: { icon: React.ElementType; label: string; value: string | number; accent?: string }) => (
-  <Card className="p-5 card-shadow animate-fade-in-up">
+  <Card className="p-5 card-shadow">
     <div className="flex items-start justify-between">
       <div>
         <p className="text-sm text-muted-foreground">{label}</p>
@@ -30,11 +30,12 @@ const Dashboard = () => {
   }, []);
 
   const now = new Date();
-  const overdueCount = orders.filter(o => new Date(o.deadline) < now && o.status !== 'Выдан клиенту').length;
+  const overdueCount = orders.filter(o => new Date(o.deadline) < now && o.status !== 'Выдан').length;
   const readyCount = orders.filter(o => o.status === 'Готов к выдаче').length;
-  const inProgressCount = orders.filter(o => o.status !== 'Выдан клиенту' && o.status !== 'Готов к выдаче').length;
+  const inProgressCount = orders.filter(o => o.status !== 'Выдан' && o.status !== 'Готов к выдаче').length;
   const totalRevenue = orders.filter(o => o.paymentStatus === 'Оплачено').reduce((s, o) => s + o.totalCost, 0);
-  const avgCheck = orders.length > 0 ? Math.round(totalRevenue / orders.filter(o => o.paymentStatus === 'Оплачено').length || 1) : 0;
+  const paidOrders = orders.filter(o => o.paymentStatus === 'Оплачено');
+  const avgCheck = paidOrders.length > 0 ? Math.round(totalRevenue / paidOrders.length) : 0;
 
   const statusData = ORDER_STATUSES.slice(0, -1).map(s => ({
     name: s.length > 12 ? s.slice(0, 12) + '…' : s,
@@ -57,7 +58,7 @@ const Dashboard = () => {
       </div>
 
       {statusData.length > 0 && (
-        <Card className="p-5 card-shadow animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+        <Card className="p-5 card-shadow">
           <h3 className="text-sm font-medium text-muted-foreground mb-4">Заказы по статусам</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -74,23 +75,23 @@ const Dashboard = () => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-5 card-shadow animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+        <Card className="p-5 card-shadow">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">KPI</h3>
           <div className="space-y-3">
             <div className="flex justify-between"><span className="text-sm">Средний чек</span><span className="font-semibold">{avgCheck.toLocaleString()} ₽</span></div>
             <div className="flex justify-between"><span className="text-sm">Клиентов</span><span className="font-semibold">{clients.length}</span></div>
-            <div className="flex justify-between"><span className="text-sm">Заказов за месяц</span><span className="font-semibold">{orders.length}</span></div>
+            <div className="flex justify-between"><span className="text-sm">Заказов</span><span className="font-semibold">{orders.length}</span></div>
           </div>
         </Card>
-        <Card className="p-5 card-shadow animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+        <Card className="p-5 card-shadow">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">Последние заказы</h3>
           <div className="space-y-2">
             {orders.slice(0, 4).map(o => {
               const client = clients.find(c => c.id === o.clientId);
-              const overdue = new Date(o.deadline) < now && o.status !== 'Выдан клиенту';
+              const overdue = new Date(o.deadline) < now && o.status !== 'Выдан';
               return (
                 <div key={o.id} className={`flex justify-between items-center text-sm px-3 py-2 rounded-md ${overdue ? 'bg-overdue/5 border border-overdue/20' : 'bg-muted/50'}`}>
-                  <span>{client ? `${client.lastName} ${client.firstName}` : '—'}</span>
+                  <span>№{o.orderNumber} {client ? `${client.lastName} ${client.firstName}` : ''}</span>
                   <span className={`text-xs font-medium ${overdue ? 'text-overdue' : 'text-muted-foreground'}`}>{o.status}</span>
                 </div>
               );
