@@ -30,9 +30,9 @@ const Dashboard = () => {
   }, []);
 
   const now = new Date();
-  const overdueCount = orders.filter(o => new Date(o.deadline) < now && o.status !== 'Выдан').length;
+  const overdueCount = orders.filter(o => new Date(o.deadline) < now && o.status !== 'Выдан клиенту').length;
   const readyCount = orders.filter(o => o.status === 'Готов к выдаче').length;
-  const inProgressCount = orders.filter(o => o.status !== 'Выдан' && o.status !== 'Готов к выдаче').length;
+  const inProgressCount = orders.filter(o => o.status !== 'Выдан клиенту' && o.status !== 'Готов к выдаче').length;
   const totalRevenue = orders.filter(o => o.paymentStatus === 'Оплачено').reduce((s, o) => s + o.totalCost, 0);
   const paidOrders = orders.filter(o => o.paymentStatus === 'Оплачено');
   const avgCheck = paidOrders.length > 0 ? Math.round(totalRevenue / paidOrders.length) : 0;
