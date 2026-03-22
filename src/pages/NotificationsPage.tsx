@@ -3,10 +3,12 @@ import { getNotifications, saveNotifications } from '@/lib/store';
 import type { Notification } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bell } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Bell, Search } from 'lucide-react';
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [search, setSearch] = useState('');
 
   useEffect(() => setNotifications(getNotifications()), []);
 
@@ -16,6 +18,8 @@ const NotificationsPage = () => {
     setNotifications(updated);
   };
 
+  const filtered = notifications.filter(n => !search || n.message.toLowerCase().includes(search.toLowerCase()) || n.type.toLowerCase().includes(search.toLowerCase()));
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div>
@@ -23,9 +27,14 @@ const NotificationsPage = () => {
         <p className="text-sm text-muted-foreground">Системные уведомления</p>
       </div>
 
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Поиск по сообщению..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+      </div>
+
       <div className="space-y-2">
-        {notifications.length === 0 && <p className="text-center text-muted-foreground py-8">Уведомлений нет</p>}
-        {notifications.map(n => (
+        {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Уведомлений нет</p>}
+        {filtered.map(n => (
           <Card key={n.id} className={`p-4 card-shadow cursor-pointer transition-colors ${n.read ? 'opacity-60' : ''}`} onClick={() => markRead(n.id)}>
             <div className="flex items-start gap-3">
               <div className={`p-2 rounded-lg ${n.read ? 'bg-muted' : 'bg-primary/10'}`}>
