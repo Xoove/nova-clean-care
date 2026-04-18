@@ -2,89 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   ТЁМНАЯ ПРЕМИУМ-ТЕМА — НИКА ЛЮКС
+   Глубокий сине-чёрный фон + изумрудные акценты
+   ============================================ */
+
 @layer base {
   :root {
-    --background: 150 10% 97%;
-    --foreground: 200 25% 12%;
+    /* Базовые поверхности */
+    --background: 222 35% 7%;
+    --foreground: 160 15% 92%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 200 25% 12%;
+    --card: 222 30% 11%;
+    --card-foreground: 160 15% 92%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 200 25% 12%;
+    --popover: 222 32% 10%;
+    --popover-foreground: 160 15% 92%;
 
-    --primary: 173 58% 39%;
-    --primary-foreground: 0 0% 100%;
+    /* Изумрудный premium */
+    --primary: 162 75% 48%;
+    --primary-foreground: 222 40% 8%;
+    --primary-glow: 162 85% 60%;
 
-    --secondary: 150 15% 93%;
-    --secondary-foreground: 200 25% 12%;
+    --secondary: 222 25% 16%;
+    --secondary-foreground: 160 15% 92%;
 
-    --muted: 150 10% 94%;
-    --muted-foreground: 200 10% 46%;
+    --muted: 222 22% 14%;
+    --muted-foreground: 160 8% 62%;
 
-    --accent: 38 92% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 188 80% 55%;
+    --accent-foreground: 222 40% 8%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 75% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 150 12% 89%;
-    --input: 150 12% 89%;
-    --ring: 173 58% 39%;
+    --border: 222 22% 18%;
+    --input: 222 22% 16%;
+    --ring: 162 75% 48%;
 
-    --radius: 0.625rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 200 25% 12%;
-    --sidebar-foreground: 150 10% 90%;
-    --sidebar-primary: 173 58% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 200 20% 18%;
-    --sidebar-accent-foreground: 150 10% 90%;
-    --sidebar-border: 200 15% 20%;
-    --sidebar-ring: 173 58% 50%;
+    /* Sidebar (используется в legacy-местах, оставляем согласованным) */
+    --sidebar-background: 222 38% 5%;
+    --sidebar-foreground: 160 15% 88%;
+    --sidebar-primary: 162 75% 55%;
+    --sidebar-primary-foreground: 222 40% 8%;
+    --sidebar-accent: 222 28% 13%;
+    --sidebar-accent-foreground: 160 15% 92%;
+    --sidebar-border: 222 25% 14%;
+    --sidebar-ring: 162 75% 55%;
 
-    --success: 152 60% 42%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    --overdue: 0 72% 51%;
+    /* Семантика */
+    --success: 152 70% 48%;
+    --success-foreground: 222 40% 8%;
+    --warning: 38 95% 58%;
+    --warning-foreground: 222 40% 8%;
+    --overdue: 0 75% 60%;
+
+    /* Градиенты и тени премиум-уровня */
+    --gradient-primary: linear-gradient(135deg, hsl(162 75% 48%), hsl(188 80% 55%));
+    --gradient-surface: linear-gradient(180deg, hsl(222 30% 12%), hsl(222 32% 9%));
+    --gradient-glow: radial-gradient(60% 60% at 50% 0%, hsl(162 75% 48% / 0.15), transparent 70%);
+
+    --shadow-elegant: 0 10px 30px -10px hsl(162 75% 30% / 0.35);
+    --shadow-card: 0 1px 0 0 hsl(0 0% 100% / 0.04) inset, 0 8px 24px -12px hsl(222 60% 0% / 0.6);
+    --shadow-glow: 0 0 0 1px hsl(162 75% 48% / 0.15), 0 0 40px -10px hsl(162 75% 48% / 0.4);
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 80% -10%, hsl(162 75% 48% / 0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, hsl(188 80% 55% / 0.06), transparent 60%);
+    background-attachment: fixed;
     font-feature-settings: "cv11", "ss01";
   }
-  h1, h2, h3, h4 {
-    @apply tracking-tight text-balance;
-  }
+  h1, h2, h3, h4 { @apply tracking-tight text-balance; }
 }
 
 @layer utilities {
   .card-shadow {
-    box-shadow: 0 1px 3px 0 hsl(200 25% 12% / 0.04), 0 4px 12px -2px hsl(200 25% 12% / 0.06);
+    background: var(--gradient-surface);
+    box-shadow: var(--shadow-card);
+    border: 1px solid hsl(var(--border));
   }
   .card-shadow-hover {
-    box-shadow: 0 2px 6px 0 hsl(200 25% 12% / 0.06), 0 8px 20px -4px hsl(200 25% 12% / 0.1);
+    box-shadow: var(--shadow-elegant);
   }
+  .glass {
+    background: hsl(222 30% 11% / 0.7);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid hsl(var(--border));
+  }
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .gradient-primary { background: var(--gradient-primary); }
+  .glow-ring { box-shadow: var(--shadow-glow); }
 }
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
   to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out both;
-}
+.animate-fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-fade-in { animation: fadeIn 0.4s ease-out both; }
