@@ -1,188 +1,189 @@
-import { useState } from 'react';
-import {
-  ITEM_TYPES, MATERIALS_WITH_DESC, SERVICES, ORDER_STATUSES_WITH_DESC, ITEM_STATUSES_WITH_DESC,
-  PAYMENT_METHODS_WITH_DESC, PAYMENT_STATUSES_WITH_DESC, POSITIONS, OPERATION_TYPES_WITH_DESC,
-  NOTIFICATION_TYPES_WITH_DESC, NOTIFICATION_STATUSES_WITH_DESC, USER_ROLES_LABELS,
-  DEFECT_TYPES_WITH_DESC,
-} from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { getDictionaries, saveDictionaries, resetDictionaries, type Dictionaries } from '@/lib/store';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
-import {
-  Shirt, Layers, ShoppingBag, ListChecks, Tag, CreditCard, Wallet,
-  Users, Wrench, Bell, BellDot, Shield, AlertTriangle,
-} from 'lucide-react';
+import { Plus, Trash2, BookOpen } from 'lucide-react';
+import { toast } from 'sonner';
+import { nextId } from '@/lib/ids';
 
-interface DirectoryItem {
-  name: string;
-  description?: string;
-  extra?: string;
-}
-
-interface DirectoryDef {
-  id: string;
+interface SimpleDir {
+  id: keyof Omit<Dictionaries, 'services'>;
   title: string;
-  icon: React.ElementType;
-  description: string;
-  items: DirectoryItem[];
 }
 
-const directories: DirectoryDef[] = [
-  {
-    id: 'item-types', title: 'Типы изделий', icon: Shirt,
-    description: 'Классификация изделий, принимаемых в химчистку',
-    items: ITEM_TYPES.map(t => ({ name: t })),
-  },
-  {
-    id: 'materials', title: 'Материалы', icon: Layers,
-    description: 'Влияет на технологию обработки изделия',
-    items: MATERIALS_WITH_DESC.map(m => ({ name: m.name, description: m.description })),
-  },
-  {
-    id: 'services', title: 'Услуги', icon: ShoppingBag,
-    description: 'Основа расчёта стоимости заказа',
-    items: SERVICES.map(s => ({ name: s.name, extra: `${s.price} ₽` })),
-  },
-  {
-    id: 'order-statuses', title: 'Статусы заказа', icon: ListChecks,
-    description: 'Строгая последовательность этапов обработки',
-    items: ORDER_STATUSES_WITH_DESC.map((s, i) => ({
-      name: s.name, description: s.description, extra: `Этап ${i + 1}`,
-    })),
-  },
-  {
-    id: 'item-statuses', title: 'Статусы изделия', icon: Tag,
-    description: 'Текущее состояние изделия в процессе обработки',
-    items: ITEM_STATUSES_WITH_DESC.map(s => ({ name: s.name, description: s.description })),
-  },
-  {
-    id: 'defect-types', title: 'Типы дефектов', icon: AlertTriangle,
-    description: 'Классификация дефектов, выявляемых при приёме изделия',
-    items: DEFECT_TYPES_WITH_DESC.map(d => ({ name: d.name, description: d.description })),
-  },
-  {
-    id: 'payment-methods', title: 'Способы оплаты', icon: CreditCard,
-    description: 'Доступные способы приёма оплаты',
-    items: PAYMENT_METHODS_WITH_DESC.map(m => ({ name: m.name, description: m.description })),
-  },
-  {
-    id: 'payment-statuses', title: 'Статусы оплаты', icon: Wallet,
-    description: 'Состояние оплаты по заказу',
-    items: PAYMENT_STATUSES_WITH_DESC.map(s => ({ name: s.name, description: s.description })),
-  },
-  {
-    id: 'positions', title: 'Должности сотрудников', icon: Users,
-    description: 'Важно для назначения операций и отчётов',
-    items: POSITIONS.map(p => ({ name: p })),
-  },
-  {
-    id: 'operation-types', title: 'Типы операций', icon: Wrench,
-    description: 'Виды технологических операций',
-    items: OPERATION_TYPES_WITH_DESC.map(o => ({ name: o.name, description: o.description })),
-  },
-  {
-    id: 'notification-types', title: 'Типы уведомлений', icon: Bell,
-    description: 'Каналы информирования клиентов',
-    items: NOTIFICATION_TYPES_WITH_DESC.map(n => ({ name: n.name, description: n.description })),
-  },
-  {
-    id: 'notification-statuses', title: 'Статусы уведомлений', icon: BellDot,
-    description: 'Состояние отправки уведомления',
-    items: NOTIFICATION_STATUSES_WITH_DESC.map(s => ({ name: s.name, description: s.description })),
-  },
-  {
-    id: 'user-roles', title: 'Роли пользователей', icon: Shield,
-    description: 'Разграничение доступа к системе',
-    items: USER_ROLES_LABELS.map(r => ({ name: r })),
-  },
+const SIMPLE_DIRS: SimpleDir[] = [
+  { id: 'positions', title: 'Должности' },
+  { id: 'userRoles', title: 'Роли пользователей' },
+  { id: 'userStatuses', title: 'Статусы пользователей' },
+  { id: 'itemTypes', title: 'Типы изделий' },
+  { id: 'materials', title: 'Материалы' },
+  { id: 'itemStatuses', title: 'Статусы изделий' },
+  { id: 'defectTypes', title: 'Типы дефектов' },
+  { id: 'orderStatuses', title: 'Статусы заказа' },
+  { id: 'paymentStatuses', title: 'Статусы оплаты' },
+  { id: 'paymentMethods', title: 'Способы оплаты' },
+  { id: 'operationTypes', title: 'Типы операций' },
+  { id: 'notificationTypes', title: 'Типы уведомлений' },
+  { id: 'notificationStatuses', title: 'Статусы отправки уведомлений' },
 ];
 
 export default function DirectoriesPage() {
-  const [activeTab, setActiveTab] = useState(directories[0].id);
+  const [dicts, setDicts] = useState<Dictionaries>(getDictionaries());
+  const [activeTab, setActiveTab] = useState<string>(SIMPLE_DIRS[0].id);
+
+  const updateDicts = (next: Dictionaries) => {
+    saveDictionaries(next);
+    setDicts({ ...next });
+  };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Справочники</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Нормативные данные системы «НИКА ЛЮКС» — {directories.length} справочников
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Справочники</h1>
+          <p className="text-sm text-muted-foreground">Нормативно-справочная информация системы — можно изменять</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => {
+          if (confirm('Восстановить значения справочников по умолчанию?')) {
+            resetDictionaries();
+            setDicts(getDictionaries());
+            toast.success('Справочники восстановлены');
+          }
+        }}>Сбросить</Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1.5 rounded-lg">
-          {directories.map(dir => (
-            <TabsTrigger
-              key={dir.id}
-              value={dir.id}
-              className="text-xs px-3 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <dir.icon className="h-3.5 w-3.5 mr-1.5" />
-              {dir.title}
+          {SIMPLE_DIRS.map(d => (
+            <TabsTrigger key={d.id} value={d.id} className="text-xs px-3 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              {d.title}
             </TabsTrigger>
           ))}
+          <TabsTrigger value="services" className="text-xs px-3 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            Услуги
+          </TabsTrigger>
         </TabsList>
 
-        {directories.map(dir => {
-          const hasDescription = dir.items.some(i => i.description);
-          const hasExtra = dir.items.some(i => i.extra);
-          return (
-            <TabsContent key={dir.id} value={dir.id} className="mt-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <dir.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{dir.title}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{dir.description}</p>
-                    </div>
-                    <Badge variant="secondary" className="ml-auto">
-                      {dir.items.length} записей
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">№</TableHead>
-                        <TableHead className={hasDescription ? 'w-1/3' : ''}>Наименование</TableHead>
-                        {hasDescription && <TableHead>Описание</TableHead>}
-                        {hasExtra && <TableHead className="text-right">Значение</TableHead>}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {dir.items.map((item, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell className="text-muted-foreground font-mono text-xs">
-                            {idx + 1}
-                          </TableCell>
-                          <TableCell className="font-medium">{item.name}</TableCell>
-                          {hasDescription && (
-                            <TableCell className="text-sm text-muted-foreground">
-                              {item.description || '—'}
-                            </TableCell>
-                          )}
-                          {hasExtra && (
-                            <TableCell className="text-right">
-                              {item.extra && <Badge variant="outline">{item.extra}</Badge>}
-                            </TableCell>
-                          )}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          );
-        })}
+        {SIMPLE_DIRS.map(d => (
+          <TabsContent key={d.id} value={d.id} className="mt-4">
+            <SimpleDictEditor
+              title={d.title}
+              items={dicts[d.id] as string[]}
+              onChange={(items) => updateDicts({ ...dicts, [d.id]: items })}
+            />
+          </TabsContent>
+        ))}
+
+        <TabsContent value="services" className="mt-4">
+          <ServicesEditor
+            services={dicts.services}
+            onChange={(services) => updateDicts({ ...dicts, services })}
+          />
+        </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function SimpleDictEditor({ title, items, onChange }: { title: string; items: string[]; onChange: (items: string[]) => void }) {
+  const [newName, setNewName] = useState('');
+
+  const add = () => {
+    const v = newName.trim();
+    if (!v) return;
+    if (items.includes(v)) { toast.error('Такая запись уже есть'); return; }
+    onChange([...items, v]);
+    setNewName('');
+    toast.success('Добавлено');
+  };
+
+  const remove = (name: string) => {
+    onChange(items.filter(x => x !== name));
+    toast.success('Удалено');
+  };
+
+  return (
+    <Card className="p-5 card-shadow space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <BookOpen className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <p className="text-sm text-muted-foreground">Записей: {items.length}</p>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Новая запись..." onKeyDown={e => e.key === 'Enter' && add()} />
+        <Button onClick={add} className="gap-1"><Plus className="h-4 w-4" />Добавить</Button>
+      </div>
+
+      <div className="space-y-1">
+        {items.map((it, i) => (
+          <div key={it} className="flex items-center justify-between bg-muted/50 px-3 py-2 rounded text-sm">
+            <span><span className="font-mono text-xs text-muted-foreground mr-2">{String(i + 1).padStart(2, '0')}</span>{it}</span>
+            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => remove(it)}><Trash2 className="h-4 w-4" /></Button>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function ServicesEditor({ services, onChange }: { services: { id: string; name: string; price: number }[]; onChange: (s: { id: string; name: string; price: number }[]) => void }) {
+  const [newName, setNewName] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+
+  const add = () => {
+    const name = newName.trim();
+    const price = Number(newPrice);
+    if (!name || isNaN(price) || price < 0) { toast.error('Заполните название и цену'); return; }
+    onChange([...services, { id: nextId('SV'), name, price }]);
+    setNewName(''); setNewPrice('');
+    toast.success('Услуга добавлена');
+  };
+
+  const remove = (id: string) => {
+    onChange(services.filter(s => s.id !== id));
+    toast.success('Услуга удалена');
+  };
+
+  return (
+    <Card className="p-5 card-shadow space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <BookOpen className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold">Услуги</h2>
+          <p className="text-sm text-muted-foreground">Записей: {services.length}</p>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Название услуги" />
+        <Input value={newPrice} onChange={e => setNewPrice(e.target.value)} placeholder="Цена, ₽" type="number" className="w-32" />
+        <Button onClick={add} className="gap-1"><Plus className="h-4 w-4" />Добавить</Button>
+      </div>
+
+      <div className="space-y-1">
+        {services.map(s => (
+          <div key={s.id} className="flex items-center justify-between bg-muted/50 px-3 py-2 rounded text-sm">
+            <span className="flex items-center gap-3">
+              <span className="font-mono text-xs text-muted-foreground">{s.id}</span>
+              <span>{s.name}</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <Badge variant="outline">{s.price} ₽</Badge>
+              <Button size="sm" variant="ghost" className="text-destructive" onClick={() => remove(s.id)}><Trash2 className="h-4 w-4" /></Button>
+            </span>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getClients, addClient, updateClient, deleteClient } from '@/lib/store';
+import { nextId } from '@/lib/ids';
 import type { Client } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,9 +19,12 @@ const ClientsPage = () => {
   const refresh = () => setClients(getClients());
   useEffect(refresh, []);
 
-  const filtered = clients.filter(c =>
-    !search || c.lastName.toLowerCase().includes(search.toLowerCase()) || c.firstName.toLowerCase().includes(search.toLowerCase()) || c.phone.includes(search)
-  );
+  const filtered = clients.filter(c => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return c.lastName.toLowerCase().includes(q) || c.firstName.toLowerCase().includes(q)
+      || c.phone.includes(search) || c.id.toLowerCase().includes(q);
+  });
 
   const handleDelete = (id: string) => {
     deleteClient(id);
@@ -40,14 +44,17 @@ const ClientsPage = () => {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Поиск по имени или телефону..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        <Input placeholder="Поиск по ФИО, телефону или ID..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
       </div>
 
       <div className="space-y-2">
         {filtered.map(c => (
           <Card key={c.id} className="p-4 card-shadow flex items-center justify-between">
             <div>
-              <p className="font-medium text-sm">{c.lastName} {c.firstName} {c.patronymic || ''}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-sm">{c.lastName} {c.firstName} {c.patronymic || ''}</p>
+                <span className="text-xs font-mono text-muted-foreground">{c.id}</span>
+              </div>
               <p className="text-xs text-muted-foreground">{c.phone} {c.email && `• ${c.email}`}</p>
               {c.note && <p className="text-xs text-muted-foreground/70 mt-0.5">{c.note}</p>}
             </div>
@@ -84,7 +91,7 @@ function ClientForm({ initial, onSave }: { initial: Client | null; onSave: () =>
       updateClient({ ...initial, firstName: firstName.trim(), lastName: lastName.trim(), patronymic: patronymic.trim() || undefined, phone: phone.trim(), email: email.trim() || undefined, note: note.trim() || undefined });
       toast.success('Клиент обновлён');
     } else {
-      addClient({ id: crypto.randomUUID(), firstName: firstName.trim(), lastName: lastName.trim(), patronymic: patronymic.trim() || undefined, phone: phone.trim(), email: email.trim() || undefined, note: note.trim() || undefined, createdAt: new Date().toISOString() });
+      addClient({ id: nextId('CL'), firstName: firstName.trim(), lastName: lastName.trim(), patronymic: patronymic.trim() || undefined, phone: phone.trim(), email: email.trim() || undefined, note: note.trim() || undefined, createdAt: new Date().toISOString() });
       toast.success('Клиент добавлен');
     }
     onSave();

@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Search, ArrowRight, Trash2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+import { nextId } from '@/lib/ids';
 
 const OrdersPage = () => {
   const { user } = useAuth();
@@ -40,7 +41,7 @@ const OrdersPage = () => {
     const idx = ORDER_STATUSES.indexOf(order.status);
     if (idx < 0 || idx >= ORDER_STATUSES.length - 1) return;
     const nextStatus = ORDER_STATUSES[idx + 1];
-    const change: StatusChange = { status: nextStatus, changedAt: new Date().toISOString(), changedBy: user?.name || '' };
+    const change: StatusChange = { id: nextId('OH'), status: nextStatus, changedAt: new Date().toISOString(), changedBy: user?.name || '', employeeId: user?.employeeId };
     const updated: Order = { ...order, status: nextStatus, statusHistory: [...order.statusHistory, change] };
 
     if (nextStatus === 'Выдан клиенту') {
@@ -56,7 +57,7 @@ const OrdersPage = () => {
     }
 
     if (nextStatus === 'Готов к выдаче') {
-      addNotification({ id: crypto.randomUUID(), orderId: order.id, clientId: order.clientId, type: 'SMS', message: `Заказ №${order.orderNumber} готов к выдаче`, createdAt: new Date().toISOString(), read: false });
+      addNotification({ id: nextId('NT'), orderId: order.id, clientId: order.clientId, type: 'SMS', message: `Заказ №${order.orderNumber} готов к выдаче`, createdAt: new Date().toISOString(), status: 'Запланировано', read: false });
     }
 
     updateOrder(updated);
@@ -307,12 +308,12 @@ function CreateOrderForm({ clients, employees, initial, onCreated, userName }: {
       updateOrder(updated);
       toast.success('Заказ обновлён');
     } else {
-      const orderId = crypto.randomUUID();
+      const orderId = nextId('OR');
       const order: Order = {
         id: orderId,
         orderNumber: getNextOrderNumber(),
         clientId,
-        items: [{ id: crypto.randomUUID(), clientId, orderId, type: itemType, material, status: 'Принято', features: features || undefined, markingCode: markingCode || undefined, defects: [] }],
+        items: [{ id: nextId('IT'), clientId, orderId, type: itemType, material, status: 'Принято', features: features || undefined, markingCode: markingCode || undefined, defects: [] }],
         services: orderServices,
         status: 'Принят',
         totalCost,
@@ -321,7 +322,7 @@ function CreateOrderForm({ clients, employees, initial, onCreated, userName }: {
         deadline: new Date(deadline).toISOString(),
         description: description || undefined,
         employeeId: employeeId || undefined,
-        statusHistory: [{ status: 'Принят', changedAt: new Date().toISOString(), changedBy: userName }],
+        statusHistory: [{ id: nextId('OH'), status: 'Принят', changedAt: new Date().toISOString(), changedBy: userName }],
         operations: [],
       };
       addOrder(order);

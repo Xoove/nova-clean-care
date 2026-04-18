@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, type ReactNode } from 'react';
 import type { User } from '@/lib/types';
 import { getCurrentUser, setCurrentUser, MOCK_USERS } from '@/lib/store';
 
@@ -22,3 +22,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export { MOCK_USERS };
+
+// Permission helpers — единая точка контроля доступа.
+export type Permission =
+  | 'orders.write' | 'orders.advance'
+  | 'clients.write'
+  | 'payments.write'
+  | 'delivery.write'
+  | 'operations.write'
+  | 'defects.write'
+  | 'notifications.write'
+  | 'reports.view'
+  | 'employees.view'
+  | 'directories.view' | 'directories.write'
+  | 'settings.view';
+
+const PERMS: Record<string, Permission[]> = {
+  admin: [
+    'orders.write','orders.advance','clients.write','payments.write','delivery.write',
+    'operations.write','defects.write','notifications.write','reports.view',
+    'employees.view','directories.view','directories.write','settings.view',
+  ],
+  production: [
+    'orders.advance','operations.write','defects.write','reports.view',
+    'employees.view','directories.view',
+  ],
+};
+
+export const can = (user: User | null, perm: Permission): boolean => {
+  if (!user) return false;
+  return PERMS[user.role]?.includes(perm) ?? false;
+};

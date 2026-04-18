@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { getOrders, updateOrder, getEmployees } from '@/lib/store';
-import { ORDER_STATUSES, OPERATION_TYPES, type Order, type Operation, type Employee } from '@/lib/types';
+import { getOrders, updateOrder, getEmployees, getDictionaries } from '@/lib/store';
+import type { Order, Operation, Employee } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { nextId } from '@/lib/ids';
 
 const OperationsPage = () => {
   const { user } = useAuth();
@@ -23,7 +25,12 @@ const OperationsPage = () => {
 
   const activeOrders = orders.filter(o => o.status !== 'Выдан клиенту');
   const allOps = orders.flatMap(o => o.operations.map(op => ({ ...op, orderNumber: o.orderNumber })));
-  const filteredOps = allOps.filter(op => !search || String(op.orderNumber).includes(search) || op.employeeName.toLowerCase().includes(search.toLowerCase()) || op.operationType.toLowerCase().includes(search.toLowerCase()));
+  const filteredOps = allOps.filter(op => !search
+    || String(op.orderNumber).includes(search)
+    || op.employeeName.toLowerCase().includes(search.toLowerCase())
+    || op.operationType.toLowerCase().includes(search.toLowerCase())
+    || op.id.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -37,7 +44,7 @@ const OperationsPage = () => {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Поиск по номеру заказа или сотруднику..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        <Input placeholder="Поиск..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
       </div>
 
       <div className="space-y-2">
@@ -46,14 +53,18 @@ const OperationsPage = () => {
           <Card key={op.id} className="p-4 card-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Заказ №{op.orderNumber}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">Заказ №{op.orderNumber}</p>
+                  <span className="text-xs font-mono text-muted-foreground">{op.id}</span>
+                </div>
                 <p className="text-xs text-muted-foreground">{op.operationType} • {op.employeeName}</p>
                 <p className="text-xs text-muted-foreground">
                   Начало: {new Date(op.startedAt).toLocaleString('ru')}
                   {op.completedAt && ` • Окончание: ${new Date(op.completedAt).toLocaleString('ru')}`}
                   {op.duration != null && ` • ${op.duration} мин`}
                 </p>
-                {op.notes && <p className="text-xs text-muted-foreground/70 mt-0.5">{op.notes}</p>}
+                {op.result && <p className="text-xs text-muted-foreground">Результат: {op.result}</p>}
+                {op.notes && <p className="text-xs text-muted-foreground/70 mt-0.5">Прим.: {op.notes}</p>}
               </div>
               <Badge variant="secondary" className="text-xs">{op.completedAt ? 'Завершена' : 'В работе'}</Badge>
             </div>
@@ -64,19 +75,21 @@ const OperationsPage = () => {
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent>
           <DialogHeader><DialogTitle>Добавить операцию</DialogTitle></DialogHeader>
-          <AddOperationForm orders={activeOrders} employees={employees} userName={user?.name || ''} onAdded={() => { setShowAdd(false); refresh(); }} />
+          <AddOperationForm orders={activeOrders} employees={employees} userName={user?.name || ''} userEmployeeId={user?.employeeId} onAdded={() => { setShowAdd(false); refresh(); }} />
         </DialogContent>
       </Dialog>
     </div>
   );
 };
 
-function AddOperationForm({ orders, employees, userName, onAdded }: { orders: Order[]; employees: Employee[]; userName: string; onAdded: () => void }) {
+function AddOperationForm({ orders, employees, userName, userEmployeeId, onAdded }: { orders: Order[]; employees: Employee[]; userName: string; userEmployeeId?: string; onAdded: () => void }) {
+  const dicts = getDictionaries();
   const [orderId, setOrderId] = useState('');
-  const [employeeId, setEmployeeId] = useState('');
-  const [operationType, setOperationType] = useState(OPERATION_TYPES[0] as string);
+  const [employeeId, setEmployeeId] = useState(userEmployeeId || '');
+  const [operationType, setOperationType] = useState(dicts.operationTypes[0]);
   const [startedAt, setStartedAt] = useState(new Date().toISOString().slice(0, 16));
   const [completedAt, setCompletedAt] = useState('');
+  const [result, setResult] = useState('');
   const [notes, setNotes] = useState('');
 
   const order = orders.find(o => o.id === orderId);
@@ -92,36 +105,37 @@ function AddOperationForm({ orders, employees, userName, onAdded }: { orders: Or
   const handleSubmit = () => {
     if (!orderId || !employeeId || !order) { toast.error('Заполните обязательные поля'); return; }
     const op: Operation = {
-      id: crypto.randomUUID(), orderId, itemId,
+      id: nextId('OP'), orderId, itemId,
       operationType,
       employeeId,
       employeeName: emp?.name || '',
       startedAt: new Date(startedAt).toISOString(),
       completedAt: completedAt ? new Date(completedAt).toISOString() : undefined,
       duration,
-      notes: notes || undefined,
+      result: result.trim() || undefined,
+      notes: notes.trim() || undefined,
     };
 
-    // Auto-advance status based on operation type
+    const ORDER_STATUSES = dicts.orderStatuses;
     const statusMap: Record<string, string> = {
       'Пятновыведение': 'Пятновыведение',
-      'Чистка': 'Чистка',
-      'Стирка': 'Чистка',
+      'Чистка': 'Чистка / стирка',
+      'Стирка': 'Чистка / стирка',
       'Сушка': 'Сушка',
       'Глажение': 'Глажение',
       'Контроль качества': 'Контроль качества',
+      'Упаковка': 'Упаковка',
     };
     const targetStatus = statusMap[operationType];
     let updated = { ...order, operations: [...order.operations, op] };
-    
+
     if (targetStatus) {
       const currentIdx = ORDER_STATUSES.indexOf(order.status);
-      const targetIdx = ORDER_STATUSES.indexOf(targetStatus as any);
-      if (targetIdx > currentIdx) {
-        // Advance through all intermediate statuses
+      const targetIdx = ORDER_STATUSES.indexOf(targetStatus);
+      if (targetIdx > currentIdx && targetIdx >= 0) {
         let newHistory = [...order.statusHistory];
         for (let i = currentIdx + 1; i <= targetIdx; i++) {
-          newHistory.push({ status: ORDER_STATUSES[i], changedAt: new Date().toISOString(), changedBy: userName });
+          newHistory.push({ id: nextId('OH'), status: ORDER_STATUSES[i], changedAt: new Date().toISOString(), changedBy: userName, employeeId });
         }
         updated = { ...updated, status: ORDER_STATUSES[targetIdx], statusHistory: newHistory };
       }
@@ -145,7 +159,7 @@ function AddOperationForm({ orders, employees, userName, onAdded }: { orders: Or
         <label className="text-sm font-medium">Тип операции *</label>
         <Select value={operationType} onValueChange={setOperationType}>
           <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>{OPERATION_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+          <SelectContent>{dicts.operationTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
         </Select>
       </div>
       <div>
@@ -167,8 +181,12 @@ function AddOperationForm({ orders, employees, userName, onAdded }: { orders: Or
       </div>
       {duration != null && duration >= 0 && <p className="text-sm text-muted-foreground">Длительность: <strong>{duration} мин</strong></p>}
       <div>
-        <label className="text-sm font-medium">Примечания</label>
-        <Input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Необязательно" />
+        <label className="text-sm font-medium">Результат операции</label>
+        <Input value={result} onChange={e => setResult(e.target.value)} placeholder="Например: Пятна удалены полностью" />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Примечание</label>
+        <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
       </div>
       <Button onClick={handleSubmit} className="w-full">Добавить операцию</Button>
     </div>

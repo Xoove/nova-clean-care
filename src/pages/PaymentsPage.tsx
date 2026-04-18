@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getOrders, getPayments, addPayment, updateOrder, deletePayment, getEmployees } from '@/lib/store';
-import { PAYMENT_METHODS, type Order, type Payment, type Employee } from '@/lib/types';
+import { getOrders, getPayments, addPayment, updateOrder, deletePayment, getEmployees, getDictionaries } from '@/lib/store';
+import type { Order, Payment, Employee } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Plus, Trash2, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { nextId } from '@/lib/ids';
 
 const PaymentsPage = () => {
   const { user } = useAuth();
@@ -23,7 +24,7 @@ const PaymentsPage = () => {
   useEffect(refresh, []);
 
   const unpaid = orders.filter(o => o.paymentStatus !== 'Оплачено');
-  const filteredPayments = payments.filter(p => !search || p.orderId.includes(search) || p.method.toLowerCase().includes(search.toLowerCase()));
+  const filteredPayments = payments.filter(p => !search || p.orderId.includes(search) || p.method.toLowerCase().includes(search.toLowerCase()) || p.id.toLowerCase().includes(search.toLowerCase()));
 
   const handleDeletePayment = (id: string) => {
     deletePayment(id);
@@ -43,7 +44,7 @@ const PaymentsPage = () => {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Поиск по способу оплаты..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        <Input placeholder="Поиск..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
       </div>
 
       <h3 className="text-sm font-medium text-muted-foreground">Неоплаченные заказы ({unpaid.length})</h3>
@@ -51,7 +52,7 @@ const PaymentsPage = () => {
         {unpaid.map(o => (
           <Card key={o.id} className="p-4 card-shadow flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">№{o.orderNumber}</p>
+              <p className="text-sm font-medium">№{o.orderNumber} <span className="text-xs font-mono text-muted-foreground ml-2">{o.id}</span></p>
               <p className="text-xs text-muted-foreground">{o.totalCost.toLocaleString()} ₽</p>
             </div>
             <Badge variant="outline">{o.paymentStatus}</Badge>
@@ -68,7 +69,10 @@ const PaymentsPage = () => {
           return (
             <Card key={p.id} className="p-4 card-shadow flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium">Заказ №{order?.orderNumber || '—'}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">Заказ №{order?.orderNumber || '—'}</p>
+                  <span className="text-xs font-mono text-muted-foreground">{p.id}</span>
+                </div>
                 <p className="text-xs text-muted-foreground">{p.method} • {new Date(p.date).toLocaleDateString('ru')} • {p.status}</p>
                 {emp && <p className="text-xs text-muted-foreground">Сотрудник: {emp.name}</p>}
               </div>
@@ -84,7 +88,7 @@ const PaymentsPage = () => {
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent>
           <DialogHeader><DialogTitle>Принять оплату</DialogTitle></DialogHeader>
-          <PaymentForm orders={unpaid} employees={employees} userId={user?.id} onPaid={() => { setShowAdd(false); refresh(); }} />
+          <PaymentForm orders={unpaid} employees={employees} userId={user?.employeeId} onPaid={() => { setShowAdd(false); refresh(); }} />
         </DialogContent>
       </Dialog>
     </div>
@@ -92,9 +96,10 @@ const PaymentsPage = () => {
 };
 
 function PaymentForm({ orders, employees, userId, onPaid }: { orders: Order[]; employees: Employee[]; userId?: string; onPaid: () => void }) {
+  const dicts = getDictionaries();
   const [orderId, setOrderId] = useState('');
   const [amount, setAmount] = useState('');
-  const [method, setMethod] = useState(PAYMENT_METHODS[0] as string);
+  const [method, setMethod] = useState(dicts.paymentMethods[0]);
   const [employeeId, setEmployeeId] = useState(userId || '');
 
   const order = orders.find(o => o.id === orderId);
@@ -104,8 +109,8 @@ function PaymentForm({ orders, employees, userId, onPaid }: { orders: Order[]; e
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount <= 0) { toast.error('Некорректная сумма'); return; }
 
-    const status = numAmount >= order.totalCost ? 'Оплачено' as const : 'Частично оплачено' as const;
-    addPayment({ id: crypto.randomUUID(), orderId, amount: numAmount, method, status, employeeId: employeeId || undefined, date: new Date().toISOString() });
+    const status = numAmount >= order.totalCost ? 'Оплачено' : 'Не оплачено';
+    addPayment({ id: nextId('PM'), orderId, amount: numAmount, method, status, employeeId: employeeId || undefined, date: new Date().toISOString() });
     updateOrder({ ...order, paymentStatus: status });
     toast.success('Оплата принята');
     onPaid();
@@ -121,14 +126,14 @@ function PaymentForm({ orders, employees, userId, onPaid }: { orders: Order[]; e
         </Select>
       </div>
       <div>
-        <label className="text-sm font-medium">Сумма *</label>
+        <label className="text-sm font-medium">Сумма оплаты *</label>
         <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder={order ? `${order.totalCost}` : '0'} />
       </div>
       <div>
         <label className="text-sm font-medium">Способ оплаты *</label>
         <Select value={method} onValueChange={setMethod}>
           <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>{PAYMENT_METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+          <SelectContent>{dicts.paymentMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
         </Select>
       </div>
       <div>
