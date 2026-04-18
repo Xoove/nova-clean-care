@@ -1,32 +1,36 @@
 import React from 'react';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, can, type Permission } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, ClipboardList, Users, BarChart3,
-  LogOut, CreditCard, Bell, Wrench, PackageCheck, BookOpen
+  LogOut, CreditCard, Bell, Wrench, PackageCheck, BookOpen,
+  AlertTriangle, UserCog, Settings,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 
 interface NavItem {
   title: string;
   url: string;
   icon: React.ElementType;
-  roles: string[];
+  perm: Permission | 'always';
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { title: 'Панель управления', url: '/', icon: LayoutDashboard, roles: ['admin','production','director'] },
-  { title: 'Заказы', url: '/orders', icon: ClipboardList, roles: ['admin','production','director'] },
-  { title: 'Клиенты', url: '/clients', icon: Users, roles: ['admin','director'] },
-  { title: 'Операции', url: '/operations', icon: Wrench, roles: ['admin','production'] },
-  { title: 'Оплата', url: '/payments', icon: CreditCard, roles: ['admin'] },
-  { title: 'Выдача', url: '/delivery', icon: PackageCheck, roles: ['admin'] },
-  { title: 'Уведомления', url: '/notifications', icon: Bell, roles: ['admin'] },
-  { title: 'Справочники', url: '/directories', icon: BookOpen, roles: ['admin','production','director'] },
-  { title: 'Отчётность', url: '/reports', icon: BarChart3, roles: ['director','admin'] },
+  { title: 'Панель управления', url: '/', icon: LayoutDashboard, perm: 'always' },
+  { title: 'Заказы', url: '/orders', icon: ClipboardList, perm: 'orders.advance' },
+  { title: 'Клиенты', url: '/clients', icon: Users, perm: 'clients.write' },
+  { title: 'Операции', url: '/operations', icon: Wrench, perm: 'operations.write' },
+  { title: 'Дефекты', url: '/defects', icon: AlertTriangle, perm: 'defects.write' },
+  { title: 'Оплата', url: '/payments', icon: CreditCard, perm: 'payments.write' },
+  { title: 'Выдача', url: '/delivery', icon: PackageCheck, perm: 'delivery.write' },
+  { title: 'Уведомления', url: '/notifications', icon: Bell, perm: 'notifications.write' },
+  { title: 'Сотрудники', url: '/employees', icon: UserCog, perm: 'employees.view' },
+  { title: 'Справочники', url: '/directories', icon: BookOpen, perm: 'directories.view' },
+  { title: 'Отчётность', url: '/reports', icon: BarChart3, perm: 'reports.view' },
+  { title: 'Настройки', url: '/settings', icon: Settings, perm: 'settings.view' },
 ];
 
 function AppSidebarContent() {
@@ -35,7 +39,7 @@ function AppSidebarContent() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 
-  const filtered = NAV_ITEMS.filter(i => user && i.roles.includes(user.role));
+  const filtered = NAV_ITEMS.filter(i => i.perm === 'always' || can(user, i.perm));
 
   return (
     <Sidebar collapsible="icon">
@@ -72,7 +76,8 @@ function AppSidebarContent() {
         {!collapsed && user && (
           <div className="p-4 border-t border-sidebar-border">
             <div className="text-sm text-sidebar-foreground">{user.name}</div>
-            <div className="text-xs text-sidebar-foreground/50 mb-2">{user.position}</div>
+            <div className="text-xs text-sidebar-foreground/50">{user.position}</div>
+            <div className="text-[10px] text-sidebar-foreground/40 font-mono mb-2">{user.id}</div>
             <button onClick={logout} className="flex items-center gap-2 text-xs text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors">
               <LogOut className="h-3.5 w-3.5" /> Выйти
             </button>

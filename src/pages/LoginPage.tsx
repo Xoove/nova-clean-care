@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth, MOCK_USERS } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 const LoginPage = () => {
@@ -21,7 +20,10 @@ const LoginPage = () => {
               onClick={() => login(u)}
               className="w-full text-left px-4 py-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all duration-200 active:scale-[0.98]"
             >
-              <div className="font-medium text-foreground">{u.name}</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-medium text-foreground">{u.name}</div>
+                <span className="text-xs font-mono text-muted-foreground">{u.id}</span>
+              </div>
               <div className="text-sm text-muted-foreground">{u.position}</div>
             </button>
           ))}
