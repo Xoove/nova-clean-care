@@ -25,12 +25,39 @@ export const ITEM_TYPES = [
   'Свитер','Пиджак','Юбка','Пуховик','Шорты','Жилет','Комбинезон','Шарф','Шторы','Одеяло','Плед','Другое'
 ] as const;
 
-export const MATERIALS = [
-  'Хлопок','Шерсть','Синтетика','Шелк','Лен','Вискоза','Полиэстер','Кожа','Замша','Мех','Смешанный материал'
-] as const;
+export const MATERIALS_WITH_DESC: { name: string; description: string }[] = [
+  { name: 'Хлопок', description: 'Натуральный растительный материал' },
+  { name: 'Шерсть', description: 'Натуральный материал животного происхождения' },
+  { name: 'Синтетика', description: 'Искусственный материал' },
+  { name: 'Шелк', description: 'Натуральный материал животного происхождения' },
+  { name: 'Лен', description: 'Натуральный растительный материал' },
+  { name: 'Вискоза', description: 'Искусственный материал из целлюлозы' },
+  { name: 'Полиэстер', description: 'Синтетический материал' },
+  { name: 'Кожа', description: 'Натуральный материал животного происхождения' },
+  { name: 'Замша', description: 'Выделанная кожа с ворсистой поверхностью' },
+  { name: 'Мех', description: 'Натуральный материал животного происхождения' },
+  { name: 'Смешанный материал', description: 'Комбинация нескольких материалов' },
+];
+export const MATERIALS = MATERIALS_WITH_DESC.map(m => m.name) as unknown as readonly string[];
 
+export const ITEM_STATUSES_WITH_DESC = [
+  { name: 'Принято', description: 'Изделие принято от клиента' },
+  { name: 'В обработке', description: 'Изделие находится в процессе обработки' },
+  { name: 'Готов к выдаче', description: 'Обработка завершена, изделие готов к передаче клиенту' },
+  { name: 'Выдано клиенту', description: 'Изделие передано клиенту' },
+] as const;
 export const ITEM_STATUSES = ['Принято','В обработке','Готово','Выдано'] as const;
 export type ItemStatus = typeof ITEM_STATUSES[number];
+
+export const DEFECT_TYPES_WITH_DESC = [
+  { name: 'Потертость', description: 'Истирание материала в отдельных местах' },
+  { name: 'Отсутствие фурнитуры', description: 'Недостающие пуговицы, молнии, крючки и прочее' },
+  { name: 'Выцветание', description: 'Потеря исходного цвета материала' },
+  { name: 'Деформация', description: 'Искажение формы изделия' },
+  { name: 'Загрязнение', description: 'Общее загрязнение поверхности изделия' },
+  { name: 'Повреждение материала', description: 'Механическое повреждение ткани или волокон' },
+  { name: 'Другое', description: 'Прочие виды дефектов' },
+] as const;
 
 export interface Item {
   id: string;
@@ -55,6 +82,22 @@ export const ORDER_STATUSES = [
   'Мелкий ремонт','Пятновыведение','Чистка / стирка','Сушка','Глажение',
   'Контроль качества','Упаковка','Готов к выдаче','Выдан клиенту'
 ] as const;
+
+export const ORDER_STATUSES_WITH_DESC: { name: string; description: string }[] = [
+  { name: 'Принят', description: 'Заказ принят от клиента и зарегистрирован в системе' },
+  { name: 'Принят в производство', description: 'Заказ передан в производственный отдел' },
+  { name: 'Определение способа обработки', description: 'Выполняется определение оптимального способа обработки изделия' },
+  { name: 'Подготовка изделия', description: 'Изделие подготавливается к технологической обработке' },
+  { name: 'Мелкий ремонт', description: 'Выполняется мелкий ремонт изделия' },
+  { name: 'Пятновыведение', description: 'Выполняется удаление пятен' },
+  { name: 'Чистка / стирка', description: 'Выполняется химическая чистка или стирка изделия' },
+  { name: 'Сушка', description: 'Выполняется сушка изделия' },
+  { name: 'Глажение', description: 'Выполняется финишная обработка глажением' },
+  { name: 'Контроль качества', description: 'Проверка результатов обработки на соответствие требованиям' },
+  { name: 'Упаковка', description: 'Изделие упаковывается для передачи в зону выдачи' },
+  { name: 'Готов к выдаче', description: 'Заказ готов к передаче клиенту' },
+  { name: 'Выдан клиенту', description: 'Заказ передан клиенту' },
+];
 
 export type OrderStatus = typeof ORDER_STATUSES[number];
 
@@ -105,8 +148,19 @@ export const POSITIONS = [
 ] as const;
 
 export const OPERATION_TYPES = [
-  'Ремонт','Пятновыведение','Чистка','Стирка','Сушка','Глажение','Контроль качества'
+  'Мелкий ремонт','Пятновыведение','Чистка','Стирка','Сушка','Глажение','Контроль качества','Упаковка'
 ] as const;
+
+export const OPERATION_TYPES_WITH_DESC: { name: string; description: string }[] = [
+  { name: 'Мелкий ремонт', description: 'Устранение мелких дефектов изделия' },
+  { name: 'Пятновыведение', description: 'Удаление пятен с поверхности изделия' },
+  { name: 'Чистка', description: 'Химическая чистка изделия' },
+  { name: 'Стирка', description: 'Влажная обработка изделия' },
+  { name: 'Сушка', description: 'Удаление влаги после обработки' },
+  { name: 'Глажение', description: 'Финишная обработка глажением или отпариванием' },
+  { name: 'Контроль качества', description: 'Проверка результатов обработки на соответствие требованиям' },
+  { name: 'Упаковка', description: 'Упаковка изделия для передачи в зону выдачи' },
+];
 
 export const USER_ROLES_LABELS = [
   'Администратор-кассир','Производственный персонал','Руководитель предприятия'
@@ -114,10 +168,33 @@ export const USER_ROLES_LABELS = [
 
 export const NOTIFICATION_TYPES = ['SMS','Email','Уведомление о готовности заказа'] as const;
 
-export const NOTIFICATION_STATUSES = ['Отправлено','Не отправлено','Ошибка'] as const;
+export const NOTIFICATION_TYPES_WITH_DESC: { name: string; description: string }[] = [
+  { name: 'SMS', description: 'Уведомление клиенту посредством SMS-сообщения' },
+  { name: 'Email', description: 'Уведомление клиенту посредством электронной почты' },
+];
+
+export const NOTIFICATION_STATUSES = ['Запланировано','Отправлено','Ошибка'] as const;
+
+export const NOTIFICATION_STATUSES_WITH_DESC: { name: string; description: string }[] = [
+  { name: 'Запланировано', description: 'Уведомление создано и ожидает отправки' },
+  { name: 'Отправлено', description: 'Уведомление успешно отправлено клиенту' },
+  { name: 'Ошибка', description: 'При отправке уведомления произошла ошибка' },
+];
 
 export const PAYMENT_METHODS = ['Наличные','Банковская карта','Безналичный расчет'] as const;
+
+export const PAYMENT_METHODS_WITH_DESC: { name: string; description: string }[] = [
+  { name: 'Наличные', description: 'Оплата наличными денежными средствами' },
+  { name: 'Банковская карта', description: 'Оплата банковской картой через терминал' },
+  { name: 'Безналичный расчет', description: 'Оплата переводом на расчетный счет организации' },
+];
+
 export const PAYMENT_STATUSES = ['Не оплачено','Частично оплачено','Оплачено'] as const;
+
+export const PAYMENT_STATUSES_WITH_DESC: { name: string; description: string }[] = [
+  { name: 'Не оплачено', description: 'Оплата по заказу не произведена' },
+  { name: 'Оплачено', description: 'Оплата по заказу произведена' },
+];
 export type PaymentStatus = typeof PAYMENT_STATUSES[number];
 
 export interface Payment {
