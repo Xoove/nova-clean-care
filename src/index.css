@@ -3,70 +3,69 @@
 @tailwind utilities;
 
 /* ============================================
-   ТЁМНАЯ ПРЕМИУМ-ТЕМА — НИКА ЛЮКС
-   Глубокий сине-чёрный фон + изумрудные акценты
+   СВЕТЛАЯ ТЕМА — НИКА ЛЮКС
+   Тёплый кремовый фон + приглушённые изумрудно-бирюзовые акценты
+   Подобрано так, чтобы не уставали глаза при долгой работе
    ============================================ */
 
 @layer base {
   :root {
-    /* Базовые поверхности */
-    --background: 222 35% 7%;
-    --foreground: 160 15% 92%;
+    /* Базовые поверхности — мягкий тёплый off-white */
+    --background: 40 30% 97%;
+    --foreground: 200 22% 18%;
 
-    --card: 222 30% 11%;
-    --card-foreground: 160 15% 92%;
+    --card: 40 40% 99%;
+    --card-foreground: 200 22% 18%;
 
-    --popover: 222 32% 10%;
-    --popover-foreground: 160 15% 92%;
+    --popover: 40 40% 99%;
+    --popover-foreground: 200 22% 18%;
 
-    /* Изумрудный premium */
-    --primary: 162 75% 48%;
-    --primary-foreground: 222 40% 8%;
-    --primary-glow: 162 85% 60%;
+    /* Приглушённый изумруд — спокойный акцент */
+    --primary: 168 42% 38%;
+    --primary-foreground: 40 40% 99%;
+    --primary-glow: 168 50% 55%;
 
-    --secondary: 222 25% 16%;
-    --secondary-foreground: 160 15% 92%;
+    --secondary: 40 25% 92%;
+    --secondary-foreground: 200 22% 22%;
 
-    --muted: 222 22% 14%;
-    --muted-foreground: 160 8% 62%;
+    --muted: 40 20% 94%;
+    --muted-foreground: 200 12% 42%;
 
-    --accent: 188 80% 55%;
-    --accent-foreground: 222 40% 8%;
+    --accent: 195 45% 45%;
+    --accent-foreground: 40 40% 99%;
 
-    --destructive: 0 75% 58%;
+    --destructive: 0 60% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 222 22% 18%;
-    --input: 222 22% 16%;
-    --ring: 162 75% 48%;
+    --border: 40 15% 86%;
+    --input: 40 20% 92%;
+    --ring: 168 42% 38%;
 
     --radius: 0.75rem;
 
-    /* Sidebar (используется в legacy-местах, оставляем согласованным) */
-    --sidebar-background: 222 38% 5%;
-    --sidebar-foreground: 160 15% 88%;
-    --sidebar-primary: 162 75% 55%;
-    --sidebar-primary-foreground: 222 40% 8%;
-    --sidebar-accent: 222 28% 13%;
-    --sidebar-accent-foreground: 160 15% 92%;
-    --sidebar-border: 222 25% 14%;
-    --sidebar-ring: 162 75% 55%;
+    --sidebar-background: 40 30% 96%;
+    --sidebar-foreground: 200 22% 22%;
+    --sidebar-primary: 168 42% 38%;
+    --sidebar-primary-foreground: 40 40% 99%;
+    --sidebar-accent: 40 25% 92%;
+    --sidebar-accent-foreground: 200 22% 22%;
+    --sidebar-border: 40 15% 86%;
+    --sidebar-ring: 168 42% 38%;
 
     /* Семантика */
-    --success: 152 70% 48%;
-    --success-foreground: 222 40% 8%;
-    --warning: 38 95% 58%;
-    --warning-foreground: 222 40% 8%;
-    --overdue: 0 75% 60%;
+    --success: 152 45% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 75% 48%;
+    --warning-foreground: 0 0% 100%;
+    --overdue: 0 60% 52%;
 
-    /* Градиенты и тени премиум-уровня */
-    --gradient-primary: linear-gradient(135deg, hsl(162 75% 48%), hsl(188 80% 55%));
-    --gradient-surface: linear-gradient(180deg, hsl(222 30% 12%), hsl(222 32% 9%));
-    --gradient-glow: radial-gradient(60% 60% at 50% 0%, hsl(162 75% 48% / 0.15), transparent 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(168 42% 40%), hsl(195 45% 48%));
+    --gradient-surface: linear-gradient(180deg, hsl(40 40% 99%), hsl(40 30% 96%));
+    --gradient-glow: radial-gradient(60% 60% at 50% 0%, hsl(168 42% 50% / 0.10), transparent 70%);
 
-    --shadow-elegant: 0 10px 30px -10px hsl(162 75% 30% / 0.35);
-    --shadow-card: 0 1px 0 0 hsl(0 0% 100% / 0.04) inset, 0 8px 24px -12px hsl(222 60% 0% / 0.6);
-    --shadow-glow: 0 0 0 1px hsl(162 75% 48% / 0.15), 0 0 40px -10px hsl(162 75% 48% / 0.4);
+    --shadow-elegant: 0 10px 30px -12px hsl(200 30% 30% / 0.18);
+    --shadow-card: 0 1px 2px 0 hsl(200 20% 20% / 0.04), 0 4px 16px -8px hsl(200 30% 30% / 0.10);
+    --shadow-glow: 0 0 0 1px hsl(168 42% 38% / 0.15), 0 0 40px -10px hsl(168 42% 38% / 0.25);
   }
 }
 
@@ -75,8 +74,8 @@
   body {
     @apply bg-background text-foreground antialiased;
     background-image:
-      radial-gradient(1200px 600px at 80% -10%, hsl(162 75% 48% / 0.08), transparent 60%),
-      radial-gradient(900px 500px at -10% 10%, hsl(188 80% 55% / 0.06), transparent 60%);
+      radial-gradient(1200px 600px at 80% -10%, hsl(168 42% 50% / 0.06), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, hsl(195 45% 50% / 0.05), transparent 60%);
     background-attachment: fixed;
     font-feature-settings: "cv11", "ss01";
   }
@@ -93,9 +92,9 @@
     box-shadow: var(--shadow-elegant);
   }
   .glass {
-    background: hsl(222 30% 11% / 0.7);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: hsl(40 40% 99% / 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border));
   }
   .gradient-text {

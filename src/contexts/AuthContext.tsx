@@ -33,19 +33,22 @@ export type Permission =
   | 'defects.write'
   | 'notifications.write'
   | 'reports.view'
-  | 'employees.view'
+  | 'employees.view' | 'employees.write'
   | 'directories.view' | 'directories.write'
   | 'settings.view';
 
 const PERMS: Record<string, Permission[]> = {
   admin: [
     'orders.write','orders.advance','clients.write','payments.write','delivery.write',
-    'operations.write','defects.write','notifications.write','reports.view',
-    'employees.view','directories.view','directories.write','settings.view',
+    'defects.write','notifications.write','reports.view',
   ],
   production: [
-    'orders.advance','operations.write','defects.write','reports.view',
-    'employees.view','directories.view',
+    'orders.advance','operations.write','defects.write',
+  ],
+  sysadmin: [
+    'employees.view','employees.write',
+    'directories.view','directories.write',
+    'settings.view',
   ],
 };
 
