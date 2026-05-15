@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getOrders, getEmployees, getSavedReports, addSavedReport } from '@/lib/store';
-import { SERVICES, type Order, type Employee } from '@/lib/types';
+import { getOrders, getEmployees, getSavedReports, addSavedReport, getDictionaries } from '@/lib/store';
+import { type Order, type Employee, type Service } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,12 +15,14 @@ const ReportsPage = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
   useEffect(() => {
     setOrders(getOrders());
     setEmployees(getEmployees());
+    setServices(getDictionaries().services as Service[]);
   }, []);
 
   const filtered = orders.filter(o => {
@@ -35,16 +37,25 @@ const ReportsPage = () => {
   const totalRevenue = paid.reduce((s, o) => s + o.totalCost, 0);
   const avgCheck = paid.length > 0 ? Math.round(totalRevenue / paid.length) : 0;
 
+  // Затраты на реагенты по заказу = Σ (себестоимость реагентов услуги × количество)
+  const reagentCostFor = (o: Order) => o.services.reduce((sum, os) => {
+    const svc = services.find(s => s.id === os.serviceId);
+    return sum + (svc?.reagentCost || 0) * os.quantity;
+  }, 0);
+  const totalReagentCost = paid.reduce((s, o) => s + reagentCostFor(o), 0);
+  const grossMargin = totalRevenue - totalReagentCost;
+
   // ---- Orders ----
   const completed = filtered.filter(o => o.status === 'Выдан клиенту');
   const inWork = filtered.filter(o => o.status !== 'Выдан клиенту' && o.status !== 'Готов к выдаче');
   const overdue = filtered.filter(o => new Date(o.deadline) < new Date() && o.status !== 'Выдан клиенту');
 
   // ---- Services ----
-  const serviceData = SERVICES.map(s => ({
+  const serviceData = services.map(s => ({
     name: s.name,
     count: filtered.reduce((sum, o) => sum + o.services.filter(os => os.serviceId === s.id).reduce((a, os) => a + os.quantity, 0), 0),
     revenue: filtered.reduce((sum, o) => sum + o.services.filter(os => os.serviceId === s.id).reduce((a, os) => a + os.sum, 0), 0),
+    reagent: filtered.reduce((sum, o) => sum + o.services.filter(os => os.serviceId === s.id).reduce((a, os) => a + os.quantity, 0), 0) * (s.reagentCost || 0),
   })).filter(d => d.count > 0);
 
   // ---- Staff ----
@@ -70,21 +81,24 @@ const ReportsPage = () => {
         <div>Общая выручка: <strong>${totalRevenue.toLocaleString()} ₽</strong></div>
         <div>Количество оплаченных заказов: <strong>${paid.length}</strong></div>
         <div>Средний чек: <strong>${avgCheck.toLocaleString()} ₽</strong></div>
+        <div>Затраты на реагенты: <strong>${totalReagentCost.toLocaleString()} ₽</strong></div>
+        <div>Выручка за вычетом реагентов: <strong>${grossMargin.toLocaleString()} ₽</strong></div>
       </div>
       <h2 class="sec">Детализация по заказам</h2>
-      <table><thead><tr><th>№</th><th>Код заказа</th><th>Дата приёма</th><th class="num">Сумма, ₽</th></tr></thead><tbody>
-        ${paid.map((o, i) => `<tr><td>${i + 1}</td><td>${o.id}</td><td>${new Date(o.createdAt).toLocaleDateString('ru')}</td><td class="num">${o.totalCost.toLocaleString()}</td></tr>`).join('')}
-        ${paid.length === 0 ? '<tr><td colspan="4" style="text-align:center">Нет данных</td></tr>' : ''}
+      <table><thead><tr><th>№</th><th>Код заказа</th><th>Дата приёма</th><th class="num">Сумма, ₽</th><th class="num">Затраты на реагенты, ₽</th></tr></thead><tbody>
+        ${paid.map((o, i) => `<tr><td>${i + 1}</td><td>${o.id}</td><td>${new Date(o.createdAt).toLocaleDateString('ru')}</td><td class="num">${o.totalCost.toLocaleString()}</td><td class="num">${reagentCostFor(o).toLocaleString()}</td></tr>`).join('')}
+        ${paid.length === 0 ? '<tr><td colspan="5" style="text-align:center">Нет данных</td></tr>' : ''}
+        <tr><td colspan="3"><strong>Итого</strong></td><td class="num"><strong>${totalRevenue.toLocaleString()}</strong></td><td class="num"><strong>${totalReagentCost.toLocaleString()}</strong></td></tr>
       </tbody></table>
       ${signatureBlock()}
     `;
-    addSavedReport({ id, type: 'revenue', dateFrom, dateTo, createdAt: new Date().toISOString(), createdBy: userName, data: { totalRevenue, count: paid.length, avgCheck } });
+    addSavedReport({ id, type: 'revenue', dateFrom, dateTo, createdAt: new Date().toISOString(), createdBy: userName, data: { totalRevenue, count: paid.length, avgCheck, totalReagentCost, grossMargin } });
     printReportHTML({ title: 'Отчёт по выручке', reportCode: id, html });
   };
 
   const genOrders = () => {
     const id = nextId('RPC');
-    const html = reportHeader({ title: 'Отчёт о выполненных заказах', reportCode: id, dateFrom, dateTo, user: userName }) + `
+    const html = reportHeader({ title: 'Отчёт по заказам', reportCode: id, dateFrom, dateTo, user: userName }) + `
       <h2 class="sec">Сводка</h2>
       <div class="summary">
         <div>Выполнено: <strong>${completed.length}</strong></div>
@@ -99,29 +113,30 @@ const ReportsPage = () => {
       ${signatureBlock()}
     `;
     addSavedReport({ id, type: 'orders', dateFrom, dateTo, createdAt: new Date().toISOString(), createdBy: userName, data: { completed: completed.length, inWork: inWork.length, overdue: overdue.length } });
-    printReportHTML({ title: 'Отчёт о выполненных заказах', reportCode: id, html });
+    printReportHTML({ title: 'Отчёт по заказам', reportCode: id, html });
   };
 
   const genServices = () => {
     const id = nextId('RPS');
     const totalCount = serviceData.reduce((s, x) => s + x.count, 0);
     const totalSum = serviceData.reduce((s, x) => s + x.revenue, 0);
-    const html = reportHeader({ title: 'Отчёт по оказанным услугам', reportCode: id, dateFrom, dateTo, user: userName }) + `
+    const totalReag = serviceData.reduce((s, x) => s + x.reagent, 0);
+    const html = reportHeader({ title: 'Отчёт по услугам', reportCode: id, dateFrom, dateTo, user: userName }) + `
       <h2 class="sec">Услуги</h2>
-      <table><thead><tr><th>№</th><th>Услуга</th><th class="num">Количество оказаний</th><th class="num">Сумма по услуге, ₽</th></tr></thead><tbody>
-        ${serviceData.map((s, i) => `<tr><td>${i + 1}</td><td>${s.name}</td><td class="num">${s.count}</td><td class="num">${s.revenue.toLocaleString()}</td></tr>`).join('')}
-        ${serviceData.length === 0 ? '<tr><td colspan="4" style="text-align:center">Нет данных</td></tr>' : ''}
-        <tr><td colspan="2"><strong>Итого</strong></td><td class="num"><strong>${totalCount}</strong></td><td class="num"><strong>${totalSum.toLocaleString()}</strong></td></tr>
+      <table><thead><tr><th>№</th><th>Услуга</th><th class="num">Количество оказаний</th><th class="num">Сумма, ₽</th><th class="num">Затраты на реагенты, ₽</th></tr></thead><tbody>
+        ${serviceData.map((s, i) => `<tr><td>${i + 1}</td><td>${s.name}</td><td class="num">${s.count}</td><td class="num">${s.revenue.toLocaleString()}</td><td class="num">${s.reagent.toLocaleString()}</td></tr>`).join('')}
+        ${serviceData.length === 0 ? '<tr><td colspan="5" style="text-align:center">Нет данных</td></tr>' : ''}
+        <tr><td colspan="2"><strong>Итого</strong></td><td class="num"><strong>${totalCount}</strong></td><td class="num"><strong>${totalSum.toLocaleString()}</strong></td><td class="num"><strong>${totalReag.toLocaleString()}</strong></td></tr>
       </tbody></table>
       ${signatureBlock()}
     `;
     addSavedReport({ id, type: 'services', dateFrom, dateTo, createdAt: new Date().toISOString(), createdBy: userName, data: serviceData });
-    printReportHTML({ title: 'Отчёт по оказанным услугам', reportCode: id, html });
+    printReportHTML({ title: 'Отчёт по услугам', reportCode: id, html });
   };
 
   const genStaff = () => {
     const id = nextId('RPP');
-    const html = reportHeader({ title: 'Отчёт о работе персонала', reportCode: id, dateFrom, dateTo, user: userName }) + `
+    const html = reportHeader({ title: 'Отчёт по персоналу', reportCode: id, dateFrom, dateTo, user: userName }) + `
       <h2 class="sec">Загрузка персонала</h2>
       <table><thead><tr><th>№</th><th>Сотрудник</th><th class="num">Кол-во выполненных операций</th><th class="num">Общее время работы, ч</th></tr></thead><tbody>
         ${empData.map((e, i) => `<tr><td>${i + 1}</td><td>${e.name}</td><td class="num">${e.count}</td><td class="num">${e.hours}</td></tr>`).join('')}
@@ -130,7 +145,7 @@ const ReportsPage = () => {
       ${signatureBlock()}
     `;
     addSavedReport({ id, type: 'staff', dateFrom, dateTo, createdAt: new Date().toISOString(), createdBy: userName, data: empData });
-    printReportHTML({ title: 'Отчёт о работе персонала', reportCode: id, html });
+    printReportHTML({ title: 'Отчёт по персоналу', reportCode: id, html });
   };
 
   const savedReports = getSavedReports();
@@ -167,10 +182,12 @@ const ReportsPage = () => {
 
         <TabsContent value="revenue">
           <Card className="p-5 card-shadow space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               <Stat label="Общая выручка" value={`${totalRevenue.toLocaleString()} ₽`} />
               <Stat label="Количество оплат" value={String(paid.length)} />
               <Stat label="Средний чек" value={`${avgCheck.toLocaleString()} ₽`} />
+              <Stat label="Затраты на реагенты" value={`${totalReagentCost.toLocaleString()} ₽`} accent="text-warning" />
+              <Stat label="За вычетом реагентов" value={`${grossMargin.toLocaleString()} ₽`} accent="text-success" />
             </div>
             <Button onClick={genRevenue} className="gap-2"><Printer className="h-4 w-4" />Сформировать PDF (RPR)</Button>
           </Card>
