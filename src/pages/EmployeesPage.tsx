@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getEmployees, addEmployee } from '@/lib/store';
+import { getEmployees, addEmployee, syncEmployeeCounter } from '@/lib/store';
 import type { Employee } from '@/lib/types';
 import { POSITIONS } from '@/lib/types';
 import { Card } from '@/components/ui/card';
@@ -25,7 +25,10 @@ const EmployeesPage = () => {
     phone: '', email: '', hiredAt: new Date().toISOString().slice(0,10),
   });
 
-  useEffect(() => setEmployees(getEmployees()), []);
+  useEffect(() => {
+    setEmployees(getEmployees());
+    syncEmployeeCounter();
+  }, []);
 
   const submit = () => {
     const { lastName, firstName, position } = form;
