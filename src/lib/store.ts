@@ -74,7 +74,21 @@ export const getEmployees = (): Employee[] => {
   return DEFAULT_EMPLOYEES;
 };
 export const saveEmployees = (e: Employee[]) => set(STORAGE_KEYS.employees, e);
-export const addEmployee = (e: Employee) => { const all = getEmployees(); all.push(e); saveEmployees(all); };
+export const addEmployee = (e: Employee) => {
+  const all = getEmployees();
+  all.push(e);
+  saveEmployees(all);
+};
+
+// Синхронизировать счётчик EM с существующими данными (для генерации новых ID)
+export const syncEmployeeCounter = () => {
+  const all = getEmployees();
+  const max = all.reduce((m, e) => {
+    const n = parseInt(e.id.replace(/^EM/, ''), 10);
+    return isNaN(n) ? m : Math.max(m, n);
+  }, 0);
+  if (max > 0) setCounter('EM', max);
+};
 
 // Notifications
 export const getNotifications = () => get<Notification>(STORAGE_KEYS.notifications);
