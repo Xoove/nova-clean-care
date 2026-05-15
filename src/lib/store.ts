@@ -74,6 +74,7 @@ export const getEmployees = (): Employee[] => {
   return DEFAULT_EMPLOYEES;
 };
 export const saveEmployees = (e: Employee[]) => set(STORAGE_KEYS.employees, e);
+export const addEmployee = (e: Employee) => { const all = getEmployees(); all.push(e); saveEmployees(all); };
 
 // Notifications
 export const getNotifications = () => get<Notification>(STORAGE_KEYS.notifications);
