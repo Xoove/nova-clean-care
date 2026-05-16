@@ -203,12 +203,12 @@ export const DEFAULT_NOTIFICATION_TYPES = ['SMS','Email'];
 export const DEFAULT_NOTIFICATION_STATUSES = ['Запланировано','Отправлено','Ошибка'];
 
 export const DEFAULT_POSITIONS = [
-  'Администратор-кассир','Технолог','Генеральный директор',
+  'Администратор-кассир','Технолог','Генеральный директор','Администратор ИС',
   'Специалист по пятновыведению','Швея','Оператор оборудования',
   'Гладильщик','Водитель-экспедитор'
 ];
 
-export const DEFAULT_USER_ROLES = ['Администратор-кассир','Производственный персонал'];
+export const DEFAULT_USER_ROLES = ['Администратор-кассир','Производственный персонал','Администратор ИС'];
 export const DEFAULT_USER_STATUSES = ['Активен','Заблокирован'];
 
 export const DEFAULT_SERVICES: Service[] = [
