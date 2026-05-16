@@ -189,6 +189,7 @@ export const importBackup = (json: string) => {
 export const MOCK_USERS: User[] = [
   { id: 'US001', employeeId: 'EM01', name: 'Иванова А.С.', role: 'admin', position: 'Администратор-кассир' },
   { id: 'US002', employeeId: 'EM02', name: 'Петров И.В.', role: 'production', position: 'Технолог' },
+  { id: 'US003', employeeId: 'EM09', name: 'Соколов А.И.', role: 'sysadmin', position: 'Администратор ИС' },
 ];
 
 export const getCurrentUser = (): User | null => {
