@@ -65,6 +65,7 @@ const DEFAULT_EMPLOYEES: Employee[] = [
   { id: 'EM06', lastName: 'Волков', firstName: 'Роман', patronymic: 'Сергеевич', position: 'Швея', phone: '+7 (916) 100-00-06', email: 'volkov@nika-lux.ru', hiredAt: '2022-11-12', status: 'Активен', name: 'Волков Р.С.' },
   { id: 'EM07', lastName: 'Николаев', firstName: 'Павел', patronymic: 'Геннадьевич', position: 'Генеральный директор', phone: '+7 (916) 100-00-07', email: 'director@nika-lux.ru', hiredAt: '2020-02-01', status: 'Активен', name: 'Николаев П.Г.' },
   { id: 'EM08', lastName: 'Григорьев', firstName: 'Артём', patronymic: 'Николаевич', position: 'Водитель-экспедитор', phone: '+7 (916) 100-00-08', email: 'grigoriev@nika-lux.ru', hiredAt: '2024-04-18', status: 'Активен', name: 'Григорьев А.Н.' },
+  { id: 'EM09', lastName: 'Соколов', firstName: 'Андрей', patronymic: 'Игоревич', position: 'Администратор ИС', phone: '+7 (916) 100-00-09', email: 'sokolov@nika-lux.ru', hiredAt: '2021-05-10', status: 'Активен', name: 'Соколов А.И.' },
 ];
 
 export const getEmployees = (): Employee[] => {
@@ -188,6 +189,7 @@ export const importBackup = (json: string) => {
 export const MOCK_USERS: User[] = [
   { id: 'US001', employeeId: 'EM01', name: 'Иванова А.С.', role: 'admin', position: 'Администратор-кассир' },
   { id: 'US002', employeeId: 'EM02', name: 'Петров И.В.', role: 'production', position: 'Технолог' },
+  { id: 'US003', employeeId: 'EM09', name: 'Соколов А.И.', role: 'sysadmin', position: 'Администратор ИС' },
 ];
 
 export const getCurrentUser = (): User | null => {

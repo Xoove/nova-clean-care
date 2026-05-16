@@ -203,21 +203,21 @@ export const DEFAULT_NOTIFICATION_TYPES = ['SMS','Email'];
 export const DEFAULT_NOTIFICATION_STATUSES = ['Запланировано','Отправлено','Ошибка'];
 
 export const DEFAULT_POSITIONS = [
-  'Администратор-кассир','Технолог','Генеральный директор',
+  'Администратор-кассир','Технолог','Генеральный директор','Администратор ИС',
   'Специалист по пятновыведению','Швея','Оператор оборудования',
   'Гладильщик','Водитель-экспедитор'
 ];
 
-export const DEFAULT_USER_ROLES = ['Администратор-кассир','Производственный персонал'];
+export const DEFAULT_USER_ROLES = ['Администратор-кассир','Производственный персонал','Администратор ИС'];
 export const DEFAULT_USER_STATUSES = ['Активен','Заблокирован'];
 
 export const DEFAULT_SERVICES: Service[] = [
   { id: 'SV00001', name: 'Химическая чистка', price: 1200, reagentCost: 250 },
   { id: 'SV00002', name: 'Стирка', price: 800, reagentCost: 120 },
   { id: 'SV00003', name: 'Пятновыведение', price: 400, reagentCost: 80 },
-  { id: 'SV00004', name: 'Глажение', price: 300, reagentCost: 30 },
+  { id: 'SV00004', name: 'Глажение', price: 300, reagentCost: 0 },
   { id: 'SV00005', name: 'Мелкий ремонт', price: 500, reagentCost: 0 },
-  { id: 'SV00006', name: 'Сушка', price: 250, reagentCost: 20 },
+  { id: 'SV00006', name: 'Сушка', price: 250, reagentCost: 0 },
 ];
 
 // Legacy aliases used across pages
